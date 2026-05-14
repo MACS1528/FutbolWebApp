@@ -7,8 +7,12 @@ Use cWebPanel.pkg
 Use cWebMenuGroup.pkg
 Use cWebMenuItem.pkg
 Use cWebForm.pkg
+Use cWebList.pkg
+Use cWebColumn.pkg
+Use cWebButton.pkg
 
 Use cligaDataDictionary.dd
+Use cequipoDataDictionary.dd
 
 Object oZoomLiga is a cWebView
     Set piColumnCount to 12
@@ -22,9 +26,14 @@ Object oZoomLiga is a cWebView
     Object oliga_DD is a cligaDataDictionary
     End_Object 
 
-    Set Main_DD To oliga_DD
-    Set Server  To oliga_DD
+    // Relación DDs para mostrar equipos (nfFromParent)
+    Object oequipo_DD is a cequipoDataDictionary
+        Set DDO_Server to oliga_DD
+        Set Constrain_file to liga.File_Number
+    End_Object
 
+    Set Main_DD to oliga_DD
+    Set Server  to oliga_DD
 
     Object oWebMainPanel is a cWebPanel
         Set piColumnCount to 12
@@ -69,6 +78,36 @@ Object oZoomLiga is a cWebView
             Set peLabelPosition to lpTop
             Set psLabel to "EquiposMax"
         End_Object 
+
+        // ---  SECCIÓN DE EQUIPOS (nfFromParent) ---
+
+        // 1º Botón que muestra los equipos (Navegación ntNavigateForward)
+        Object oBtnEquipos is a cWebButton
+            Set psCaption to "Ver Equipos (Botón)"
+            Set piColumnSpan to 4
+            Set piColumnIndex to 0
+            
+            WebRegisterPath ntNavigateForward oEquipo //  Equipo.wo en el proyecto
+
+            Procedure OnClick
+                Send NavigatePath
+            End_Procedure
+        End_Object
+
+        // 2º Lista directa de equipos filtrados por esta liga
+        Object oEquiposList is a cWebList
+            Set pbFillHeight to True
+            Set piColumnSpan to 12
+            Set Server to oequipo_DD
+            Set psCaption to "Equipos de esta Liga"
+
+            Object oequipo_Nombre is a cWebColumn
+                Entry_Item equipo.Nombre
+                Set psCaption to "Nombre del Equipo"
+                Set piWidth to 300
+            End_Object
+        End_Object
+
     End_Object 
 
     Object oActionGroup is a cWebMenuGroup
@@ -80,7 +119,6 @@ Object oZoomLiga is a cWebView
             Procedure OnClick
                 Send Request_Save
             End_Procedure
-
         End_Object 
 
         Object oEditBtn is a cWebMenuItem
@@ -90,7 +128,6 @@ Object oZoomLiga is a cWebView
                 Send ChangeEditMode True
                 Send SetActionButtons
             End_Procedure
-
         End_Object 
 
         Object oDeleteBtn is a cWebMenuItem
@@ -101,7 +138,6 @@ Object oZoomLiga is a cWebView
             Procedure OnClick
                 Send Request_Delete
             End_Procedure
-
         End_Object 
 
         Object oCancelChangesBtn is a cWebMenuItem
@@ -111,7 +147,6 @@ Object oZoomLiga is a cWebView
             Procedure OnClick
                 Send RefreshRecord
             End_Procedure
-
         End_Object 
     End_Object 
 
@@ -124,7 +159,6 @@ Object oZoomLiga is a cWebView
         Get GetNavigateData to NavigateData
         Get HasRecord of hoDD to bHasRecord
 
-        // let's hide all buttons and then Show the ones we want
         WebSet pbRender of oEditBtn to False
         WebSet pbRender of oSaveBtn to False
         WebSet pbRender of oCancelChangesBtn to False
@@ -141,35 +175,30 @@ Object oZoomLiga is a cWebView
     End_Procedure
 
     Procedure OnViewSaved Handle hoServer Boolean bChanged
-        // Close after save
         Send NavigateClose Self
     End_Procedure
 
-    // this will close the view after a delete
     Procedure OnViewDeleted Handle hoDDO
         Send NavigateClose Self
     End_Procedure
 
     Procedure OnNavigateForward tWebNavigateData NavigateData Integer hoInvokingView Integer hoInvokingObject
+        //  Análisis del InvokingObject 
+        If (hoInvokingObject <> 0) Begin
+            Showln "Navegación iniciada por el objeto: " (Name(hoInvokingObject))
+        End
+
         Case Begin
             Case (NavigateData.eNavigateType = nfFromMain)
-                // If from main, this is a propbably a main file Select to Zoom.
                 Case Break
-
             Case (NavigateData.eNavigateType = nfFromParent)
-                // If from parent, this is a constrained drill down.
+                // Aquí podrías añadir lógica si vinieras desde una vista "Abuela"
                 Case Break
-
             Case (NavigateData.eNavigateType = nfFromChild)
-                // If from child, this is a probably a parent Zoom from a Zoom.
                 Case Break
-
-            Case Else // must be nfUndefined
-
         Case End
 
         Send SetActionButtons
-
     End_Procedure
 
-End_Object 
+End_Object

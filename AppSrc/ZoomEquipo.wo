@@ -24,11 +24,11 @@ Object oZoomEquipo is a cWebView
     End_Object 
 
     Object oequipo_DD is a cequipoDataDictionary
-        Set DDO_Server To oliga_DD
+        Set DDO_Server to oliga_DD
     End_Object 
 
-    Set Main_DD To oequipo_DD
-    Set Server  To oequipo_DD
+    Set Main_DD to oequipo_DD
+    Set Server  to oequipo_DD
 
 
     Object oWebMainPanel is a cWebPanel
@@ -59,8 +59,9 @@ Object oZoomEquipo is a cWebView
             Set psLabel to "LigaID"
             Set pbPromptButton to True
 
-// ToDo: Fill in the from-child parent Select view object name for navigate forward
-//            WebRegisterPath ntNavigateForward oSelectView
+            //  From child (Equipo) -> Select padre (Liga)
+            // Registramos la ruta hacia la vista de selección de Ligas
+            WebRegisterPath ntNavigateForward oLiga
 
             Procedure OnPrompt
                 Send NavigatePath
@@ -148,6 +149,12 @@ Object oZoomEquipo is a cWebView
     End_Procedure
 
     Procedure OnNavigateForward tWebNavigateData NavigateData Integer hoInvokingView Integer hoInvokingObject
+        //  Análisis del InvokingObject
+        // Mostramos el nombre del objeto que inició la navegación (Select -> Zoom)
+        If (hoInvokingObject <> 0) Begin
+            Showln "Navegación iniciada por el objeto: " (Name(hoInvokingObject))
+        End
+
         Case Begin
             Case (NavigateData.eNavigateType = nfFromMain)
                 // If from main, this is a propbably a main file Select to Zoom.
@@ -158,7 +165,7 @@ Object oZoomEquipo is a cWebView
                 Case Break
 
             Case (NavigateData.eNavigateType = nfFromChild)
-                // If from child, this is a probably a parent Zoom from a Zoom.
+                //  Aquí entraremos cuando volvamos de seleccionar la Liga
                 Case Break
 
             Case Else // must be nfUndefined
@@ -169,4 +176,4 @@ Object oZoomEquipo is a cWebView
 
     End_Procedure
 
-End_Object 
+End_Object

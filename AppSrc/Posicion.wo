@@ -23,8 +23,8 @@ Object oPosicion is a cWebView
     Object oposicion_DD is a cposicionDataDictionary
     End_Object 
 
-    Set Main_DD To oposicion_DD
-    Set Server  To oposicion_DD
+    Set Main_DD to oposicion_DD
+    Set Server  to oposicion_DD
 
 
     Object oList is a cWebList
@@ -34,6 +34,9 @@ Object oPosicion is a cWebView
         Set pbFillHeight to True
         Set pbShowHeader to False
         Set piSortColumn to 0
+        
+        // Se registra la ruta de navegación hacia la vista Zoom de Posición
+        WebRegisterPath ntNavigateForward oZoomPosicion
 
         Object oposicionID is a cWebColumn
             Entry_Item posicion.ID
@@ -68,18 +71,14 @@ Object oPosicion is a cWebView
 
         End_Object 
 
-// ToDo: Fill in the from-parent child Select view object name for navigate forward
-//        WebRegisterPath ntNavigateForward oSelectView
-
         Procedure OnRowClick String sRowId
             tWebNavigateData NavigateData
             Get GetNavigateData to NavigateData
 
             Case Begin
                 Case (NavigateData.eNavigateType = nfFromParent)
-// ToDo: Fill in the from-parent child Select view object name for navigate forward
-Error DFERR_PROGRAM "NavigateForward to this from-parent child Select view not yet defined"
-//                    Send NavigateForward of oSelectView Self
+                    // Se activa la navegación real hacia el detalle
+                    Send NavigateForward of oZoomPosicion Self
                     Case Break
 
                 Case (NavigateData.eNavigateType = nfFromChild)
@@ -91,9 +90,8 @@ Error DFERR_PROGRAM "NavigateForward to this from-parent child Select view not y
                     Case Break
 
                 Case Else // must be nfUndefined
-// ToDo: Fill in the from-parent child Select view object name for navigate forward
-Error DFERR_PROGRAM "NavigateForward to this from-parent child Select view not yet defined"
-//                    Send NavigateForward of oSelectView Self
+                    // Se activa la navegación real hacia el detalle
+                    Send NavigateForward of oZoomPosicion Self
 
             Case End
         End_Procedure
@@ -158,5 +156,4 @@ Error DFERR_PROGRAM "NavigateForward to this from-parent child Select view not y
 
     End_Procedure
 
-
-End_Object 
+End_Object

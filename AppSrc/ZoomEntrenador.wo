@@ -25,15 +25,15 @@ Object oZoomEntrenador is a cWebView
     End_Object 
 
     Object oequipo_DD is a cequipoDataDictionary
-        Set DDO_Server To oliga_DD
+        Set DDO_Server to oliga_DD
     End_Object 
 
     Object oentrenador_DD is a centrenadorDataDictionary
-        Set DDO_Server To oequipo_DD
+        Set DDO_Server to oequipo_DD
     End_Object 
 
-    Set Main_DD To oentrenador_DD
-    Set Server  To oentrenador_DD
+    Set Main_DD to oentrenador_DD
+    Set Server  to oentrenador_DD
 
 
     Object oWebMainPanel is a cWebPanel
@@ -80,8 +80,8 @@ Object oZoomEntrenador is a cWebView
             Set psLabel to "EquipoID"
             Set pbPromptButton to True
 
-// ToDo: Fill in the from-child parent Select view object name for navigate forward
-//            WebRegisterPath ntNavigateForward oSelectView
+            // From child (Entrenador) -> Select padre (Equipo)
+            WebRegisterPath ntNavigateForward oEquipo
 
             Procedure OnPrompt
                 Send NavigatePath
@@ -169,6 +169,11 @@ Object oZoomEntrenador is a cWebView
     End_Procedure
 
     Procedure OnNavigateForward tWebNavigateData NavigateData Integer hoInvokingView Integer hoInvokingObject
+        // Análisis del InvokingObject
+        If (hoInvokingObject <> 0) Begin
+            Showln "Navegación iniciada por el objeto: " (Name(hoInvokingObject))
+        End
+
         Case Begin
             Case (NavigateData.eNavigateType = nfFromMain)
                 // If from main, this is a propbably a main file Select to Zoom.
@@ -179,7 +184,7 @@ Object oZoomEntrenador is a cWebView
                 Case Break
 
             Case (NavigateData.eNavigateType = nfFromChild)
-                // If from child, this is a probably a parent Zoom from a Zoom.
+                // TAREA Punto 2: Aquí entraría si viniéramos de una búsqueda inversa
                 Case Break
 
             Case Else // must be nfUndefined
@@ -190,4 +195,4 @@ Object oZoomEntrenador is a cWebView
 
     End_Procedure
 
-End_Object 
+End_Object
