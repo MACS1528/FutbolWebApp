@@ -67,6 +67,16 @@ Object oZoomEquipo is a cWebView
                 Send NavigatePath
             End_Procedure
         End_Object 
+
+        // AÑADIDO NECESARIO: Muestra el nombre de la Liga seleccionada de forma automática
+        Object oligaNombre is a cWebForm
+            Entry_Item liga.Nombre
+            Set piColumnSpan to 10
+            Set piColumnIndex to 2
+            Set peLabelPosition to lpTop
+            Set psLabel to "Nombre de la Liga"
+            Set pbEnabled to False // Es de solo lectura porque se rellena por relación
+        End_Object
     End_Object 
 
     Object oActionGroup is a cWebMenuGroup

@@ -78,6 +78,22 @@ Object oEntrenador is a cWebView
             Set piWidth to 100
         End_Object 
 
+        // =========================================================
+        // AMPLIACIÓN VISUAL: DATOS COMPLEMENTARIOS EN LA LISTA
+        // =========================================================
+        Object oequipoNombre is a cWebColumn
+            Entry_Item equipo.Nombre
+            Set psCaption to "Equipo"
+            Set piWidth to 400
+        End_Object 
+
+        Object oLigaNombre is a cWebColumn
+            Entry_Item Liga.Nombre
+            Set psCaption to "Liga Competente"
+            Set piWidth to 400
+        End_Object 
+        // =========================================================
+
         Object oDetailButton is a cWebColumnButton
             Set psCaption to "btn"
             Set piWidth to 45
