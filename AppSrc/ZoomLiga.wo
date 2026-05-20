@@ -198,15 +198,6 @@ Object oZoomLiga is a cWebView
                 Case Break
         Case End
 
-        // Lógica esencial para controlar la lista de equipos subordinada
-        If (NavigateData.bNewRecord) Begin
-            WebSet pbRender of oEquiposList to False // Oculta la lista si la liga es totalmente nueva
-        End
-        Else Begin
-            WebSet pbRender of oEquiposList to True
-            Send GridRefresh of oEquiposList         // Fuerza la carga de los equipos asignados a esta liga
-        End
-
         Send SetActionButtons
     End_Procedure
 
