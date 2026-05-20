@@ -40,32 +40,43 @@ Object oLiga is a cWebView
 
         Object oligaID is a cWebColumn
             Entry_Item liga.ID
-            Set psCaption to "liga.ID"
-            Set piWidth to 100
+            Set psCaption to "ID"
+            Set piWidth to 70
         End_Object 
 
         Object oligaNombre is a cWebColumn
             Entry_Item liga.Nombre
-            Set psCaption to "liga.Nombre"
-            Set piWidth to 1000
+            Set psCaption to "Liga"
+            Set piWidth to 450
         End_Object 
 
         Object oligaPais is a cWebColumn
             Entry_Item liga.Pais
-            Set psCaption to "liga.Pais"
-            Set piWidth to 500
+            Set psCaption to "País"
+            Set piWidth to 250
         End_Object 
 
+        // Columna calculada para mostrar cupos en formato compacto (ej: 3 / 20)
+        Object oligaCuposCalculados is a cWebColumn
+            Set psCaption to "Equipos"
+            Set piWidth to 120
+            Set peAlign to alignCenter
+
+            Procedure OnSetCalculatedValue String ByRef sValue
+                Move (Trim(String(liga.Equipos)) + " / " + Trim(String(liga.EquiposMax))) to sValue
+            End_Procedure
+        End_Object
+
+        // Ocultamos las columnas individuales para que no descuadren la fila móvil,
+        // pero se quedan declaradas con Entry_Item para mantener el buffer del DD activo.
         Object oligaEquipos is a cWebColumn
             Entry_Item liga.Equipos
-            Set psCaption to "liga.Equipos"
-            Set piWidth to 100
+            Set pbRender to False
         End_Object 
 
         Object oligaEquiposMax is a cWebColumn
             Entry_Item liga.EquiposMax
-            Set psCaption to "liga.EquiposMax"
-            Set piWidth to 100
+            Set pbRender to False
         End_Object 
 
         Object oDetailButton is a cWebColumnButton

@@ -61,6 +61,13 @@ Object oEquipo is a cWebView
             Set piWidth to 100
         End_Object 
 
+        // Muestra el nombre de la liga en la lista por relación automática
+        Object oligaNombre is a cWebColumn
+            Entry_Item liga.Nombre
+            Set psCaption to "Liga"
+            Set piWidth to 250
+        End_Object
+
         Object oDetailButton is a cWebColumnButton
             Set psCaption to "btn"
             Set piWidth to 45

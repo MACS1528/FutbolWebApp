@@ -94,11 +94,32 @@ Object oZoomJugador is a cWebView
             End_Procedure
         End_Object 
 
+        // Muestra el nombre real del Equipo vinculado al ID superior
+        Object oequipoNombre is a cWebForm
+            Entry_Item equipo.Nombre
+            Set piColumnSpan to 10
+            Set piColumnIndex to 2
+            Set peLabelPosition to lpTop
+            Set psLabel to "Nombre del Equipo"
+            Set pbReadOnly to True
+        End_Object
+
+        // Muestra el nombre de la posición seleccionada en texto
+        Object oposicionNombre is a cWebForm
+            Entry_Item posicion.Nombre
+            Set piColumnSpan to 8
+            Set piColumnIndex to 0
+            Set peLabelPosition to lpTop
+            Set psLabel to "Posición"
+            Set pbReadOnly to True
+        End_Object
+
         // Undefined -> Select posición (Botón personalizado)
         Object oBtnSeleccionarPosicion is a cWebButton
             Set psCaption to "Seleccionar Posición"
             Set piColumnSpan to 4
-            Set piColumnIndex to 0
+            Set piColumnIndex to 8
+            Set peLabelPosition to lpTop
             
             WebRegisterPath ntNavigateForward oPosicion
 
