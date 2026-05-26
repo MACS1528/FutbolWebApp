@@ -66,7 +66,7 @@ Object oDashboard is a cWebView
             End_Object
 
             // =========================================================
-            // TILES DE TU BASE DE DATOS DE FÚTBOL
+            // TILES BASE DE DATOS DE FÚTBOL
             // =========================================================
 
             Object oTileEntrenador is a cWebHtmlBox
@@ -75,7 +75,8 @@ Object oDashboard is a cWebView
                 Set psCSSClass to "Tile LightAlternate"
                 Set psHtml to '<div class="WebCon_Sizer" data-ServerOnClick="openview"><div class="Tile_Title">Entrenadores</div><div class="Tile_Subtitle">Ver lista</div></div>'
 
-                WebRegisterPath ntNavigateForward oEntrenador
+                // CORRECCIÓN: Se cambia ntNavigateForward por ntNavigateForwardCustom
+                WebRegisterPath ntNavigateForwardCustom oEntrenador
 
                 Procedure OnClick String sId String sParam
                     Send NavigatePath
@@ -89,7 +90,8 @@ Object oDashboard is a cWebView
                 Set psCSSClass to "Tile Dark"
                 Set psHtml to '<div class="WebCon_Sizer" data-ServerOnClick="openview"><div class="Tile_Title">Jugadores</div><div class="Tile_Subtitle">Ver lista</div></div>'
 
-                WebRegisterPath ntNavigateForward oJugador
+                // CORRECCIÓN: Se cambia ntNavigateForward por ntNavigateForwardCustom
+                WebRegisterPath ntNavigateForwardCustom oJugador
 
                 Procedure OnClick String sId String sParam
                     Send NavigatePath
@@ -102,7 +104,8 @@ Object oDashboard is a cWebView
                 Set psCSSClass to "Tile DarkAlternate"
                 Set psHtml to '<div class="WebCon_Sizer" data-ServerOnClick="openview"><div class="Tile_Title">Equipos</div><div class="Tile_Subtitle">Ver lista</div></div>'
 
-                WebRegisterPath ntNavigateForward oEquipo
+                // CORRECCIÓN: Se cambia ntNavigateForward por ntNavigateForwardCustom
+                WebRegisterPath ntNavigateForwardCustom oEquipo
 
                 Procedure OnClick String sId String sParam
                     Send NavigatePath
@@ -116,7 +119,8 @@ Object oDashboard is a cWebView
                 Set psCSSClass to "Tile Light"
                 Set psHtml to '<div class="WebCon_Sizer" data-ServerOnClick="openview"><div class="Tile_Title">Ligas</div><div class="Tile_Subtitle">Ver lista</div></div>'
 
-                WebRegisterPath ntNavigateForward oLiga
+                // CORRECCIÓN: Se cambia ntNavigateForward por ntNavigateForwardCustom
+                WebRegisterPath ntNavigateForwardCustom oLiga
 
                 Procedure OnClick String sId String sParam
                     Send NavigatePath
@@ -129,7 +133,8 @@ Object oDashboard is a cWebView
                 Set psCSSClass to "Tile LightAlternate"
                 Set psHtml to '<div class="WebCon_Sizer" data-ServerOnClick="openview"><div class="Tile_Title">Posiciones</div><div class="Tile_Subtitle">Ver lista</div></div>'
 
-                WebRegisterPath ntNavigateForward oPosicion
+                // CORRECCIÓN: Se cambia ntNavigateForward por ntNavigateForwardCustom
+                WebRegisterPath ntNavigateForwardCustom oPosicion
 
                 Procedure OnClick String sId String sParam
                     Send NavigatePath

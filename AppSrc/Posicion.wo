@@ -89,10 +89,10 @@ Object oPosicion is a cWebView
                     Send NavigateClose Self
                     Case Break
 
-                Case Else // must be nfUndefined
-                    // Se activa la navegación real hacia el detalle
-                    Send NavigateForward of oZoomPosicion Self
-
+                Case Else // must be nfUndefined (Ruta personalizada de ZoomJugador)
+                    // CORRECCIÓN: Al hacer clic en la fila, cerramos devolviendo la posición seleccionada al jugador
+                    Send NavigateClose Self
+                    Case Break
             Case End
         End_Procedure
 

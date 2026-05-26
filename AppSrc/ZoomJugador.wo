@@ -7,12 +7,12 @@ Use cWebPanel.pkg
 Use cWebMenuGroup.pkg
 Use cWebMenuItem.pkg
 Use cWebForm.pkg
-Use cWebButton.pkg
 
 Use cligaDataDictionary.dd
 Use cequipoDataDictionary.dd
 Use cjugadorDataDictionary.dd
 Use cposicionDataDictionary.dd
+Use cjugadorposicionDataDictionary.dd
 
 Object oZoomJugador is a cWebView
     Set piColumnCount to 12
@@ -35,11 +35,46 @@ Object oZoomJugador is a cWebView
 
     Object ojugador_DD is a cjugadorDataDictionary
         Set DDO_Server to oequipo_DD
-        Set DDO_Server to oposicion_DD
     End_Object 
 
-    Set Main_DD to ojugador_DD
-    Set Server  to ojugador_DD
+    Object ojugadorposicion_DD is a cjugadorposicionDataDictionary
+        Set DDO_Server to ojugador_DD
+        Set DDO_Server to oposicion_DD
+
+        // Interceptamos el guardado en el búfer interno del DDO
+        Procedure OnSaveRecord
+            Integer iJugadorID iPosicionID iIntermediaID
+            
+            // Capturamos los valores que el usuario ha seleccionado en la interfaz
+            Move jugador.ID to iJugadorID
+            Move posicion.ID to iPosicionID
+            
+            If (iJugadorID > 0 and iPosicionID > 0) Begin
+                // Buscamos de forma limpia en el búfer si el jugador ya tenía registro previo
+                Clear jugadorposicion
+                Move iJugadorID to jugadorposicion.JugadorID
+                Find ge jugadorposicion by 2 // Index 2 (JugadorID)
+                
+                // Si ya existía, recuperamos su ID primario para asegurar el UPDATE
+                If (Found and jugadorposicion.JugadorID = iJugadorID) Begin
+                    Move jugadorposicion.ID to iIntermediaID
+                    
+                    Clear jugadorposicion
+                    Move iIntermediaID to jugadorposicion.ID
+                    Find eq jugadorposicion by 1 // Index 1 (ID Primaria)
+                End
+                
+                // Forzamos los valores correctos en el búfer que se va a enviar a MariaDB
+                Move iJugadorID to jugadorposicion.JugadorID
+                Move iPosicionID to jugadorposicion.PosicionID
+            End
+            
+            Forward Send OnSaveRecord
+        End_Procedure
+    End_Object
+
+    Set Main_DD to ojugadorposicion_DD
+    Set Server  to ojugadorposicion_DD
 
 
     Object oWebMainPanel is a cWebPanel
@@ -72,11 +107,21 @@ Object oZoomJugador is a cWebView
 
         Object ojugadorNacionalidad is a cWebForm
             Entry_Item jugador.Nacionalidad
-            Set piColumnSpan to 8
+            Set piColumnSpan to 6
             Set piColumnIndex to 0
             Set peLabelPosition to lpTop
             Set psLabel to "Nacionalidad"
         End_Object 
+
+        // Muestra de forma segura la posición actual cargada
+        Object ojugadorposicionPosicion is a cWebForm
+            Entry_Item posicion.Nombre
+            Set piColumnSpan to 6
+            Set piColumnIndex to 6
+            Set peLabelPosition to lpTop
+            Set psLabel to "Posición Actual" // <-- CORREGIDO: Se quitó el 'store' intruso que rompía la compilación
+            Set pbReadOnly to True
+        End_Object
 
         Object oequipoID is a cWebForm
             Entry_Item equipo.ID
@@ -86,7 +131,6 @@ Object oZoomJugador is a cWebView
             Set psLabel to "EquipoID"
             Set pbPromptButton to True
 
-            // From child (Jugador) -> Select padre (Equipo)
             WebRegisterPath ntNavigateForward oEquipo
 
             Procedure OnPrompt
@@ -94,7 +138,6 @@ Object oZoomJugador is a cWebView
             End_Procedure
         End_Object 
 
-        // Muestra el nombre real del Equipo vinculado al ID superior
         Object oequipoNombre is a cWebForm
             Entry_Item equipo.Nombre
             Set piColumnSpan to 10
@@ -104,26 +147,18 @@ Object oZoomJugador is a cWebView
             Set pbReadOnly to True
         End_Object
 
-        // Muestra el nombre de la posición seleccionada en texto
+        // Para realizar la asignación de la nueva posición mediante la lupa
         Object oposicionNombre is a cWebForm
             Entry_Item posicion.Nombre
-            Set piColumnSpan to 8
+            Set piColumnSpan to 12
             Set piColumnIndex to 0
             Set peLabelPosition to lpTop
-            Set psLabel to "Posición"
-            Set pbReadOnly to True
-        End_Object
+            Set psLabel to "Seleccionar Posición"
+            Set pbPromptButton to True
 
-        // Undefined -> Select posición (Botón personalizado)
-        Object oBtnSeleccionarPosicion is a cWebButton
-            Set psCaption to "Seleccionar Posición"
-            Set piColumnSpan to 4
-            Set piColumnIndex to 8
-            Set peLabelPosition to lpTop
-            
             WebRegisterPath ntNavigateForward oPosicion
 
-            Procedure OnClick
+            Procedure OnPrompt
                 Send NavigatePath
             End_Procedure
         End_Object
@@ -135,10 +170,10 @@ Object oZoomJugador is a cWebView
             Set psCSSClass to "WebSaveMenuItem"
             Set psCaption to "Save"
 
+            // flujo estándar 100% seguro del framework web
             Procedure OnClick
                 Send Request_Save
             End_Procedure
-
         End_Object 
 
         Object oEditBtn is a cWebMenuItem
@@ -148,7 +183,6 @@ Object oZoomJugador is a cWebView
                 Send ChangeEditMode True
                 Send SetActionButtons
             End_Procedure
-
         End_Object 
 
         Object oDeleteBtn is a cWebMenuItem
@@ -159,7 +193,6 @@ Object oZoomJugador is a cWebView
             Procedure OnClick
                 Send Request_Delete
             End_Procedure
-
         End_Object 
 
         Object oCancelChangesBtn is a cWebMenuItem
@@ -169,7 +202,6 @@ Object oZoomJugador is a cWebView
             Procedure OnClick
                 Send RefreshRecord
             End_Procedure
-
         End_Object 
     End_Object 
 
@@ -182,7 +214,6 @@ Object oZoomJugador is a cWebView
         Get GetNavigateData to NavigateData
         Get HasRecord of hoDD to bHasRecord
 
-        // let's hide all buttons and then Show the ones we want
         WebSet pbRender of oEditBtn to False
         WebSet pbRender of oSaveBtn to False
         WebSet pbRender of oCancelChangesBtn to False
@@ -199,40 +230,33 @@ Object oZoomJugador is a cWebView
     End_Procedure
 
     Procedure OnViewSaved Handle hoServer Boolean bChanged
-        // Close after save
         Send NavigateClose Self
     End_Procedure
 
-    // this will close the view after a delete
     Procedure OnViewDeleted Handle hoDDO
         Send NavigateClose Self
     End_Procedure
 
+    // Sincronización al entrar a la vista mediante los índices relacionales
     Procedure OnNavigateForward tWebNavigateData NavigateData Integer hoInvokingView Integer hoInvokingObject
-        // Análisis del InvokingObject
-        If (hoInvokingObject <> 0) Begin
-            Showln "Navegación iniciada por el objeto: " (Name(hoInvokingObject))
+        Handle hoMainDD hoJugadorDD
+        Boolean bTieneJugador
+        
+        Get Server to hoMainDD
+        Get ojugador_DD to hoJugadorDD
+        
+        Get HasRecord of hoJugadorDD to bTieneJugador
+        
+        If (bTieneJugador) Begin
+            Clear jugadorposicion
+            Move jugador.ID to jugadorposicion.JugadorID
+            Find ge jugadorposicion by 2
+            If (Found and jugadorposicion.JugadorID = jugador.ID) Begin
+                Send Request_Assign of hoMainDD jugadorposicion.File_Number
+            End
         End
 
-        Case Begin
-            Case (NavigateData.eNavigateType = nfFromMain)
-                // If from main, this is a propbably a main file Select to Zoom.
-                Case Break
-
-            Case (NavigateData.eNavigateType = nfFromParent)
-                // If from parent, this is a constrained drill down.
-                Case Break
-
-            Case (NavigateData.eNavigateType = nfFromChild)
-                // If from child, this is a probably a parent Zoom from a Zoom.
-                Case Break
-
-            Case Else // must be nfUndefined
-
-        Case End
-
         Send SetActionButtons
-
     End_Procedure
 
 End_Object
