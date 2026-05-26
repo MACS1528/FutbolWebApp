@@ -7,6 +7,7 @@ Use cWebPanel.pkg
 Use cWebMenuGroup.pkg
 Use cWebMenuItem.pkg
 Use cWebForm.pkg
+Use cWebGroup.pkg
 
 Use cligaDataDictionary.dd
 Use cequipoDataDictionary.dd
@@ -16,7 +17,7 @@ Use cjugadorposicionDataDictionary.dd
 
 Object oZoomJugador is a cWebView
     Set piColumnCount to 12
-    Set psCaption to "ZoomJugador"
+    Set psCaption to "Detalle del Jugador"
     Set peWebViewStyle to wvsDrilldown
     Set peViewType to vtZoom
     Set pbShowCaption to False
@@ -81,96 +82,100 @@ Object oZoomJugador is a cWebView
         Set piColumnCount to 12
         WebSetResponsive piColumnCount rmMobile to 4
 
-        Object ojugadorID is a cWebForm
-            Entry_Item jugador.ID
-            Set piColumnSpan to 2
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "ID"
-        End_Object 
+        // --- GRUPO: DATOS PERSONALES ---
+        Object oGroupPersonal is a cWebGroup
+            Set psCaption to "Datos Personales"
+            Set piColumnCount to 12
 
-        Object ojugadorNombre is a cWebForm
-            Entry_Item jugador.Nombre
-            Set piColumnSpan to 10
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "Nombre"
-        End_Object 
+            Object ojugadorID is a cWebForm
+                Entry_Item jugador.ID
+                Set piColumnSpan to 2
+                Set piColumnIndex to 0
+                Set peLabelPosition to lpTop
+                Set psLabel to "ID"
+            End_Object 
 
-        Object ojugadorApellido is a cWebForm
-            Entry_Item jugador.Apellido
-            Set piColumnSpan to 10
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "Apellido"
-        End_Object 
+            Object ojugadorNombre is a cWebForm
+                Entry_Item jugador.Nombre
+                Set piColumnSpan to 5
+                Set piColumnIndex to 2
+                Set peLabelPosition to lpTop
+                Set psLabel to "Nombre"
+            End_Object 
 
-        Object ojugadorNacionalidad is a cWebForm
-            Entry_Item jugador.Nacionalidad
-            Set piColumnSpan to 6
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "Nacionalidad"
-        End_Object 
-
-        // Muestra de forma segura la posición actual cargada
-        Object ojugadorposicionPosicion is a cWebForm
-            Entry_Item posicion.Nombre
-            Set piColumnSpan to 6
-            Set piColumnIndex to 6
-            Set peLabelPosition to lpTop
-            Set psLabel to "Posición Actual" // <-- CORREGIDO: Se quitó el 'store' intruso que rompía la compilación
-            Set pbReadOnly to True
+            Object ojugadorApellido is a cWebForm
+                Entry_Item jugador.Apellido
+                Set piColumnSpan to 5
+                Set piColumnIndex to 7
+                Set peLabelPosition to lpTop
+                Set psLabel to "Apellido"
+            End_Object 
         End_Object
 
-        Object oequipoID is a cWebForm
-            Entry_Item equipo.ID
-            Set piColumnSpan to 2
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "EquipoID"
-            Set pbPromptButton to True
+        // --- GRUPO: INFORMACIÓN DEPORTIVA ---
+        Object oGroupDeportivo is a cWebGroup
+            Set psCaption to "Información Deportiva"
+            Set piColumnCount to 12
 
-            WebRegisterPath ntNavigateForward oEquipo
+            Object ojugadorNacionalidad is a cWebForm
+                Entry_Item jugador.Nacionalidad
+                Set piColumnSpan to 6
+                Set piColumnIndex to 0
+                Set peLabelPosition to lpTop
+                Set psLabel to "Nacionalidad"
+            End_Object 
 
-            Procedure OnPrompt
-                Send NavigatePath
-            End_Procedure
-        End_Object 
+            Object ojugadorposicionPosicion is a cWebForm
+                Entry_Item posicion.Nombre
+                Set piColumnSpan to 6
+                Set piColumnIndex to 6
+                Set peLabelPosition to lpTop
+                Set psLabel to "Posición Actual"
+                Set pbReadOnly to True
+            End_Object
 
-        Object oequipoNombre is a cWebForm
-            Entry_Item equipo.Nombre
-            Set piColumnSpan to 10
-            Set piColumnIndex to 2
-            Set peLabelPosition to lpTop
-            Set psLabel to "Nombre del Equipo"
-            Set pbReadOnly to True
-        End_Object
+            Object oequipoID is a cWebForm
+                Entry_Item equipo.ID
+                Set piColumnSpan to 2
+                Set piColumnIndex to 0
+                Set peLabelPosition to lpTop
+                Set psLabel to "Equipo ID"
+                Set pbPromptButton to True
+                WebRegisterPath ntNavigateForward oEquipo
+                Procedure OnPrompt
+                    Send NavigatePath
+                End_Procedure
+            End_Object 
 
-        // Para realizar la asignación de la nueva posición mediante la lupa
-        Object oposicionNombre is a cWebForm
-            Entry_Item posicion.Nombre
-            Set piColumnSpan to 12
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "Seleccionar Posición"
-            Set pbPromptButton to True
+            Object oequipoNombre is a cWebForm
+                Entry_Item equipo.Nombre
+                Set piColumnSpan to 10
+                Set piColumnIndex to 2
+                Set peLabelPosition to lpTop
+                Set psLabel to "Nombre del Equipo"
+                Set pbReadOnly to True
+            End_Object
 
-            WebRegisterPath ntNavigateForward oPosicion
-
-            Procedure OnPrompt
-                Send NavigatePath
-            End_Procedure
+            // Para realizar la asignación de la nueva posición mediante la lupa
+            Object oposicionNombre is a cWebForm
+                Entry_Item posicion.Nombre
+                Set piColumnSpan to 12
+                Set piColumnIndex to 0
+                Set peLabelPosition to lpTop
+                Set psLabel to "Seleccionar Posición"
+                Set pbPromptButton to True
+                WebRegisterPath ntNavigateForward oPosicion
+                Procedure OnPrompt
+                    Send NavigatePath
+                End_Procedure
+            End_Object
         End_Object
     End_Object 
 
     Object oActionGroup is a cWebMenuGroup
-
         Object oSaveBtn is a cWebMenuItem
             Set psCSSClass to "WebSaveMenuItem"
             Set psCaption to "Save"
-
-            // flujo estándar 100% seguro del framework web
             Procedure OnClick
                 Send Request_Save
             End_Procedure
@@ -189,7 +194,6 @@ Object oZoomJugador is a cWebView
             Set psCSSClass to "WebDeleteMenuItem"
             Set psCaption to "Delete"
             Set peActionDisplay to adMenu
-
             Procedure OnClick
                 Send Request_Delete
             End_Procedure

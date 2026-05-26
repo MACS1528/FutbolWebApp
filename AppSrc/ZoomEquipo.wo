@@ -7,13 +7,14 @@ Use cWebPanel.pkg
 Use cWebMenuGroup.pkg
 Use cWebMenuItem.pkg
 Use cWebForm.pkg
+Use cWebGroup.pkg
 
 Use cligaDataDictionary.dd
 Use cequipoDataDictionary.dd
 
 Object oZoomEquipo is a cWebView
     Set piColumnCount to 12
-    Set psCaption to "ZoomEquipo"
+    Set psCaption to "Detalle del Equipo"
     Set peWebViewStyle to wvsDrilldown
     Set peViewType to vtZoom
     Set pbShowCaption to False
@@ -35,50 +36,62 @@ Object oZoomEquipo is a cWebView
         Set piColumnCount to 12
         WebSetResponsive piColumnCount rmMobile to 4
 
-        Object oequipoID is a cWebForm
-            Entry_Item equipo.ID
-            Set piColumnSpan to 2
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "ID"
-        End_Object 
+        Object oGroupGeneral is a cWebGroup
+            Set psCaption to "Información del Equipo"
+            Set piColumnCount to 12
 
-        Object oequipoNombre is a cWebForm
-            Entry_Item equipo.Nombre
-            Set piColumnSpan to 12
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "Nombre"
-        End_Object 
+            Object oequipoID is a cWebForm
+                Entry_Item equipo.ID
+                Set piColumnSpan to 2
+                Set piColumnIndex to 0
+                Set peLabelPosition to lpTop
+                Set psLabel to "ID"
+            End_Object 
 
-        Object oligaID is a cWebForm
-            Entry_Item liga.ID
-            Set piColumnSpan to 2
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "LigaID"
-            Set pbPromptButton to True
+            Object oequipoNombre is a cWebForm
+                Entry_Item equipo.Nombre
+                Set piColumnSpan to 10
+                Set piColumnIndex to 2
+                Set peLabelPosition to lpTop
+                Set psLabel to "Nombre del Equipo"
+            End_Object 
+        End_Object
 
-            //  From child (Equipo) -> Select padre (Liga)
-            // Registramos la ruta hacia la vista de selección de Ligas
-            WebRegisterPath ntNavigateForward oLiga
+        Object oGroupLiga is a cWebGroup
+            Set psCaption to "Asignación de Liga"
+            Set piColumnCount to 12
 
-            Procedure OnPrompt
-                Send NavigatePath
-            End_Procedure
-        End_Object 
+            Object oligaID is a cWebForm
+                Entry_Item liga.ID
+                Set piColumnSpan to 3
+                Set piColumnIndex to 0
+                Set peLabelPosition to lpTop
+                Set psLabel to "Liga ID"
+                Set pbPromptButton to True
+                WebRegisterPath ntNavigateForward oLiga
+                Procedure OnPrompt
+                    Send NavigatePath
+                End_Procedure
+            End_Object 
+
+            Object oligaNombre is a cWebForm
+                Entry_Item liga.Nombre
+                Set piColumnSpan to 9
+                Set piColumnIndex to 3
+                Set peLabelPosition to lpTop
+                Set psLabel to "Nombre de la Liga"
+                Set pbReadOnly to True
+            End_Object 
+        End_Object
     End_Object 
 
     Object oActionGroup is a cWebMenuGroup
-
         Object oSaveBtn is a cWebMenuItem
             Set psCSSClass to "WebSaveMenuItem"
             Set psCaption to "Save"
-
             Procedure OnClick
                 Send Request_Save
             End_Procedure
-
         End_Object 
 
         Object oEditBtn is a cWebMenuItem
@@ -88,18 +101,15 @@ Object oZoomEquipo is a cWebView
                 Send ChangeEditMode True
                 Send SetActionButtons
             End_Procedure
-
         End_Object 
 
         Object oDeleteBtn is a cWebMenuItem
             Set psCSSClass to "WebDeleteMenuItem"
             Set psCaption to "Delete"
             Set peActionDisplay to adMenu
-
             Procedure OnClick
                 Send Request_Delete
             End_Procedure
-
         End_Object 
 
         Object oCancelChangesBtn is a cWebMenuItem
@@ -109,7 +119,6 @@ Object oZoomEquipo is a cWebView
             Procedure OnClick
                 Send RefreshRecord
             End_Procedure
-
         End_Object 
     End_Object 
 
@@ -122,7 +131,6 @@ Object oZoomEquipo is a cWebView
         Get GetNavigateData to NavigateData
         Get HasRecord of hoDD to bHasRecord
 
-        // let's hide all buttons and then Show the ones we want
         WebSet pbRender of oEditBtn to False
         WebSet pbRender of oSaveBtn to False
         WebSet pbRender of oCancelChangesBtn to False
@@ -139,41 +147,29 @@ Object oZoomEquipo is a cWebView
     End_Procedure
 
     Procedure OnViewSaved Handle hoServer Boolean bChanged
-        // Close after save
         Send NavigateClose Self
     End_Procedure
 
-    // this will close the view after a delete
     Procedure OnViewDeleted Handle hoDDO
         Send NavigateClose Self
     End_Procedure
 
     Procedure OnNavigateForward tWebNavigateData NavigateData Integer hoInvokingView Integer hoInvokingObject
-        //  Análisis del InvokingObject
-        // Mostramos el nombre del objeto que inició la navegación (Select -> Zoom)
         If (hoInvokingObject <> 0) Begin
             Showln "Navegación iniciada por el objeto: " (Name(hoInvokingObject))
         End
 
         Case Begin
             Case (NavigateData.eNavigateType = nfFromMain)
-                // If from main, this is a propbably a main file Select to Zoom.
-                Case Break
-
+            Case Break
             Case (NavigateData.eNavigateType = nfFromParent)
-                // If from parent, this is a constrained drill down.
-                Case Break
-
+            Case Break
             Case (NavigateData.eNavigateType = nfFromChild)
-                //  Aquí entraremos cuando volvamos de seleccionar la Liga
-                Case Break
-
-            Case Else // must be nfUndefined
-
+            Case Break
+            Case Else 
         Case End
 
         Send SetActionButtons
-
     End_Procedure
 
 End_Object

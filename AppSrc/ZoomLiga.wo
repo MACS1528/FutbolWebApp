@@ -1,5 +1,5 @@
 ﻿// C:\DataFlex Projects\FutbolWebApp\AppSrc\ZoomLiga.wo
-// ZoomLiga
+// ZoomLiga - Versión Optimizada
 //
 
 Use cWebView.pkg
@@ -10,13 +10,14 @@ Use cWebForm.pkg
 Use cWebList.pkg
 Use cWebColumn.pkg
 Use cWebButton.pkg
+Use cWebGroup.pkg
 
 Use cligaDataDictionary.dd
 Use cequipoDataDictionary.dd
 
 Object oZoomLiga is a cWebView
     Set piColumnCount to 12
-    Set psCaption to "ZoomLiga"
+    Set psCaption to "Detalle de Liga"
     Set peWebViewStyle to wvsDrilldown
     Set peViewType to vtZoom
     Set pbShowCaption to False
@@ -26,7 +27,6 @@ Object oZoomLiga is a cWebView
     Object oliga_DD is a cligaDataDictionary
     End_Object 
 
-    // Relación DDs para mostrar equipos (nfFromParent)
     Object oequipo_DD is a cequipoDataDictionary
         Set DDO_Server to oliga_DD
         Set Constrain_file to liga.File_Number
@@ -39,85 +39,86 @@ Object oZoomLiga is a cWebView
         Set piColumnCount to 12
         WebSetResponsive piColumnCount rmMobile to 4
 
-        Object oligaID is a cWebForm
-            Entry_Item liga.ID
-            Set piColumnSpan to 2
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "ID"
-        End_Object 
+        Object oGroupGeneral is a cWebGroup
+            Set psCaption to "Información de la Liga"
+            Set piColumnCount to 12
 
-        Object oligaNombre is a cWebForm
-            Entry_Item liga.Nombre
-            Set piColumnSpan to 10 // Ajustado para completar la fila junto al ID
-            Set piColumnIndex to 2 // Empieza justo después del ID
-            Set peLabelPosition to lpTop
-            Set psLabel to "Nombre"
-        End_Object 
+            Object oligaID is a cWebForm
+                Entry_Item liga.ID
+                Set piColumnSpan to 2
+                Set piColumnIndex to 0
+                Set peLabelPosition to lpTop
+                Set psLabel to "ID"
+            End_Object 
 
-        Object oligaPais is a cWebForm
-            Entry_Item liga.Pais
-            Set piColumnSpan to 8
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "País"
-        End_Object 
+            Object oligaNombre is a cWebForm
+                Entry_Item liga.Nombre
+                Set piColumnSpan to 10
+                Set piColumnIndex to 2
+                Set peLabelPosition to lpTop
+                Set psLabel to "Nombre de la Liga"
+            End_Object 
 
-        Object oligaEquipos is a cWebForm
-            Entry_Item liga.Equipos
-            Set piColumnSpan to 2
-            Set piColumnIndex to 8 // Colocado en paralelo justo al lado del país
-            Set peLabelPosition to lpTop
-            Set psLabel to "Equipos"
-        End_Object 
+            Object oligaPais is a cWebForm
+                Entry_Item liga.Pais
+                Set piColumnSpan to 8
+                Set piColumnIndex to 0
+                Set peLabelPosition to lpTop
+                Set psLabel to "País"
+            End_Object 
 
-        Object oligaEquiposMax is a cWebForm
-            Entry_Item liga.EquiposMax
-            Set piColumnSpan to 2
-            Set piColumnIndex to 10 // Cierra la fila junto a la cantidad actual de equipos
-            Set peLabelPosition to lpTop
-            Set psLabel to "Máx."
-        End_Object 
+            Object oligaEquipos is a cWebForm
+                Entry_Item liga.Equipos
+                Set piColumnSpan to 2
+                Set piColumnIndex to 8
+                Set peLabelPosition to lpTop
+                Set psLabel to "Equipos"
+            End_Object 
 
-        // ---  SECCIÓN DE EQUIPOS (nfFromParent) ---
-
-        // 1º Botón que muestra los equipos (Navegación ntNavigateForward)
-        Object oBtnEquipos is a cWebButton
-            Set psCaption to "Ver Equipos (Botón)"
-            Set piColumnSpan to 4
-            Set piColumnIndex to 0
-            
-            WebRegisterPath ntNavigateForward oEquipo //  Equipo.wo en el proyecto
-
-            Procedure OnClick
-                Send NavigatePath
-            End_Procedure
+            Object oligaEquiposMax is a cWebForm
+                Entry_Item liga.EquiposMax
+                Set piColumnSpan to 2
+                Set piColumnIndex to 10
+                Set peLabelPosition to lpTop
+                Set psLabel to "Máx."
+            End_Object 
         End_Object
 
-        // 2º Lista directa de equipos filtrados por esta liga
-        Object oEquiposList is a cWebList
-            Set pbFillHeight to True
-            Set piColumnSpan to 12
-            Set Server to oequipo_DD
-            Set psCaption to "Equipos de esta Liga"
-            Set psCSSClass to "MobileList" // Asigna la clase móvil limpia
-            Set pbShowHeader to False      // Oculta la cabecera vieja con el subrayado feo
+        Object oGroupEquipos is a cWebGroup
+            Set psCaption to "Equipos Inscritos"
+            Set piColumnCount to 12
 
-            Object oequipo_Nombre is a cWebColumn
-                Entry_Item equipo.Nombre
-                Set psCaption to "Nombre del Equipo"
-                Set piWidth to 300
+            Object oBtnEquipos is a cWebButton
+                Set psCaption to "Ver Lista Completa"
+                Set piColumnSpan to 12
+                WebRegisterPath ntNavigateForward oEquipo
+                Procedure OnClick
+                    Send NavigatePath
+                End_Procedure
+            End_Object
+
+            Object oEquiposList is a cWebList
+                Set piHeight to 250          // MEJORA: Altura fija en lugar de FillHeight para asegurar visibilidad
+                Set pbFillHeight to False    
+                Set piColumnSpan to 12
+                Set Server to oequipo_DD
+                Set psCSSClass to "MobileList"
+                Set pbShowHeader to True 
+                Set pbServerOnRowClick to True // MEJORA: Habilitar interacción de fila
+
+                Object oequipo_Nombre is a cWebColumn
+                    Entry_Item equipo.Nombre
+                    Set psCaption to "Nombre del Equipo"
+                    Set piWidth to 300
+                End_Object
             End_Object
         End_Object
-
     End_Object 
 
     Object oActionGroup is a cWebMenuGroup
-
         Object oSaveBtn is a cWebMenuItem
             Set psCSSClass to "WebSaveMenuItem"
-            Set psCaption to "Save"
-
+            Set psCaption to "Guardar"
             Procedure OnClick
                 Send Request_Save
             End_Procedure
@@ -125,7 +126,7 @@ Object oZoomLiga is a cWebView
 
         Object oEditBtn is a cWebMenuItem
             Set psCSSClass to "WebEditMenuItem"
-            Set psCaption to "Edit"
+            Set psCaption to "Editar"
             Procedure OnClick
                 Send ChangeEditMode True
                 Send SetActionButtons
@@ -134,9 +135,8 @@ Object oZoomLiga is a cWebView
 
         Object oDeleteBtn is a cWebMenuItem
             Set psCSSClass to "WebDeleteMenuItem"
-            Set psCaption to "Delete"
+            Set psCaption to "Eliminar"
             Set peActionDisplay to adMenu
-
             Procedure OnClick
                 Send Request_Delete
             End_Procedure
@@ -144,7 +144,7 @@ Object oZoomLiga is a cWebView
 
         Object oCancelChangesBtn is a cWebMenuItem
             Set psCSSClass to "WebIcon_Refresh"
-            Set psCaption to "Clear Changes"
+            Set psCaption to "Descartar Cambios"
             Set peActionDisplay to adMenu
             Procedure OnClick
                 Send RefreshRecord
@@ -185,21 +185,9 @@ Object oZoomLiga is a cWebView
     End_Procedure
 
     Procedure OnNavigateForward tWebNavigateData NavigateData Integer hoInvokingView Integer hoInvokingObject
-        //  Análisis del InvokingObject 
         If (hoInvokingObject <> 0) Begin
-            Showln "Navegación iniciada por el objeto: " (Name(hoInvokingObject))
+            Showln "Navegación iniciada por: " (Name(hoInvokingObject))
         End
-
-        Case Begin
-            Case (NavigateData.eNavigateType = nfFromMain)
-                Case Break
-            Case (NavigateData.eNavigateType = nfFromParent)
-                // Aquí podrías añadir lógica si vinieras desde una vista "Abuela"
-                Case Break
-            Case (NavigateData.eNavigateType = nfFromChild)
-                Case Break
-        Case End
-
         Send SetActionButtons
     End_Procedure
 

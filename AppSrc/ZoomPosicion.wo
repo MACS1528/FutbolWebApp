@@ -1,5 +1,5 @@
 ﻿// C:\DataFlex Projects\FutbolWebApp\AppSrc\ZoomPosicion.wo
-// ZoomPosicion
+// ZoomPosicion - Versión completa y funcional
 //
 
 Use cWebView.pkg
@@ -7,12 +7,16 @@ Use cWebPanel.pkg
 Use cWebMenuGroup.pkg
 Use cWebMenuItem.pkg
 Use cWebForm.pkg
+Use cWebList.pkg
+Use cWebColumn.pkg
+Use cWebGroup.pkg
 
 Use cposicionDataDictionary.dd
+Use cjugadorposicionDataDictionary.dd 
 
 Object oZoomPosicion is a cWebView
     Set piColumnCount to 12
-    Set psCaption to "ZoomPosicion"
+    Set psCaption to "Detalle de Posición"
     Set peWebViewStyle to wvsDrilldown
     Set peViewType to vtZoom
     Set pbShowCaption to False
@@ -22,72 +26,100 @@ Object oZoomPosicion is a cWebView
     Object oposicion_DD is a cposicionDataDictionary
     End_Object 
 
+    Object ojugadorposicion_DD is a cjugadorposicionDataDictionary
+        Set DDO_Server to oposicion_DD
+        
+        // AÑADIDO: Esta restricción asegura que el puente solo muestre 
+        // los jugadores vinculados a la posición actual.
+        Procedure OnConstrain
+            Forward Send OnConstrain
+            Constrain jugadorposicion.PosicionID eq posicion.ID
+        End_Procedure
+    End_Object
+
     Set Main_DD to oposicion_DD
     Set Server  to oposicion_DD
-
 
     Object oWebMainPanel is a cWebPanel
         Set piColumnCount to 12
         WebSetResponsive piColumnCount rmMobile to 4
 
-        Object oposicionID is a cWebForm
-            Entry_Item posicion.ID
-            Set piColumnSpan to 2
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "ID"
-        End_Object 
+        Object oGroupGeneral is a cWebGroup
+            Set psCaption to "Información de la Posición"
+            Set piColumnCount to 12
 
-        Object oposicionNombre is a cWebForm
-            Entry_Item posicion.Nombre
-            Set piColumnSpan to 8
-            Set piColumnIndex to 0
-            Set peLabelPosition to lpTop
-            Set psLabel to "Nombre"
-        End_Object 
+            Object oposicionID is a cWebForm
+                Entry_Item posicion.ID
+                Set piColumnSpan to 2
+                Set piColumnIndex to 0
+                Set peLabelPosition to lpTop
+                Set psLabel to "ID"
+            End_Object 
+
+            Object oposicionNombre is a cWebForm
+                Entry_Item posicion.Nombre
+                Set piColumnSpan to 10
+                Set piColumnIndex to 2
+                Set peLabelPosition to lpTop
+                Set psLabel to "Nombre de la Posición"
+            End_Object 
+        End_Object
+
+        Object oGroupJugadores is a cWebGroup
+            Set psCaption to "Jugadores en esta Posición"
+            Set piColumnCount to 12
+
+            Object oJugadoresList is a cWebList
+                Set piHeight to 250
+                Set pbFillHeight to False
+                Set piColumnSpan to 12
+                Set Server to ojugadorposicion_DD 
+                Set psCSSClass to "MobileList"
+                Set pbShowHeader to True
+
+                Object ojugador_Nombre is a cWebColumn
+                    Entry_Item jugador.Nombre 
+                    Set psCaption to "Nombre del Jugador"
+                    Set piWidth to 300
+                End_Object
+            End_Object
+        End_Object
     End_Object 
 
     Object oActionGroup is a cWebMenuGroup
-
         Object oSaveBtn is a cWebMenuItem
             Set psCSSClass to "WebSaveMenuItem"
-            Set psCaption to "Save"
-
+            Set psCaption to "Guardar"
             Procedure OnClick
                 Send Request_Save
             End_Procedure
-
         End_Object 
 
         Object oEditBtn is a cWebMenuItem
             Set psCSSClass to "WebEditMenuItem"
-            Set psCaption to "Edit"
+            Set psCaption to "Editar"
             Procedure OnClick
                 Send ChangeEditMode True
                 Send SetActionButtons
             End_Procedure
-
         End_Object 
 
         Object oDeleteBtn is a cWebMenuItem
             Set psCSSClass to "WebDeleteMenuItem"
-            Set psCaption to "Delete"
+            Set psCaption to "Eliminar"
             Set peActionDisplay to adMenu
-
             Procedure OnClick
                 Send Request_Delete
             End_Procedure
-
         End_Object 
 
         Object oCancelChangesBtn is a cWebMenuItem
             Set psCSSClass to "WebIcon_Refresh"
-            Set psCaption to "Clear Changes"
+            Set psCaption to "Descartar Cambios"
             Set peActionDisplay to adMenu
             Procedure OnClick
                 Send RefreshRecord
             End_Procedure
-
         End_Object 
     End_Object 
 
@@ -100,7 +132,6 @@ Object oZoomPosicion is a cWebView
         Get GetNavigateData to NavigateData
         Get HasRecord of hoDD to bHasRecord
 
-        // let's hide all buttons and then Show the ones we want
         WebSet pbRender of oEditBtn to False
         WebSet pbRender of oSaveBtn to False
         WebSet pbRender of oCancelChangesBtn to False
@@ -117,41 +148,24 @@ Object oZoomPosicion is a cWebView
     End_Procedure
 
     Procedure OnViewSaved Handle hoServer Boolean bChanged
-        // Close after save
         Send NavigateClose Self
     End_Procedure
 
-    // this will close the view after a delete
     Procedure OnViewDeleted Handle hoDDO
         Send NavigateClose Self
     End_Procedure
 
     Procedure OnNavigateForward tWebNavigateData NavigateData Integer hoInvokingView Integer hoInvokingObject
-        //  Análisis del InvokingObject
-        // Verificamos qué objeto nos llama (normalmente la lista o el botón de selección)
-        If (hoInvokingObject <> 0) Begin
-            Showln "Navegación iniciada por el objeto: " (Name(hoInvokingObject))
+        // Cargar registro padre si viene de la lista
+        If (NavigateData.sRowId <> "") Begin
+            Send FindByRowId of oposicion_DD posicion.File_Number (DeserializeRowID(NavigateData.sRowId))
         End
-
-        Case Begin
-            Case (NavigateData.eNavigateType = nfFromMain)
-                // If from main, this is a propbably a main file Select to Zoom.
-                Case Break
-
-            Case (NavigateData.eNavigateType = nfFromParent)
-                // If from parent, this is a constrained drill down.
-                Case Break
-
-            Case (NavigateData.eNavigateType = nfFromChild)
-                // If from child, this is a probably a parent Zoom from a Zoom.
-                Case Break
-
-            Case Else // must be nfUndefined
-
-        Case End
-
+        
+        // Refrescar lista de la tabla puente
+        Send Rebuild_Constraints of ojugadorposicion_DD
+        
+        Forward Send OnNavigateForward NavigateData hoInvokingView hoInvokingObject
         Send SetActionButtons
-
     End_Procedure
 
 End_Object

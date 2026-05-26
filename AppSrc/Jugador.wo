@@ -42,8 +42,8 @@ Object oJugador is a cWebView
         Set psCSSClass to "MobileList"
         Set pbServerOnRowClick to True
         Set pbFillHeight to True
-        Set pbShowHeader to False
-        Set piSortColumn to 0
+        Set pbShowHeader to True // Encabezados activados
+        Set piSortColumn to 1    // Ordenar por Nombre Completo por defecto
 
         // Se registra la ruta de navegación hacia la vista Zoom del Jugador
         WebRegisterPath ntNavigateForward oZoomJugador
@@ -77,16 +77,14 @@ Object oJugador is a cWebView
             Set piWidth to 300
         End_Object 
 
-        // Ocultamos el ID del equipo para que la lista quede limpia, pero manteniendo
-        // el objeto intacto para que no se altere la estructura original.
+        // Ocultamos el ID del equipo para que la lista quede limpia
         Object oequipoID is a cWebColumn
             Entry_Item equipo.ID
             Set psCaption to "Equipo ID"
             Set pbRender to False
         End_Object 
 
-        // Ocultamos las columnas individuales nativas de Nombre y Apellido para que no se dupliquen, 
-        // pero las dejamos aquí declaradas con su Entry_Item para que los buffers del Data Dictionary sigan funcionando al 100%
+        // Ocultamos las columnas individuales nativas
         Object ojugadorNombre is a cWebColumn
             Entry_Item jugador.Nombre
             Set pbRender to False
@@ -98,12 +96,12 @@ Object oJugador is a cWebView
         End_Object 
 
         Object oDetailButton is a cWebColumnButton
-            Set psCaption to "btn"
-            Set piWidth to 45
+            Set psCaption to "Editar" // Texto legible
+            Set piWidth to 80
             Set pbFixedWidth to True
             Set pbResizable to False
             Set piListRowSpan to 1
-            Set psBtnCssClass to "WebButtonIcon WebIcon_Info"
+            Set psBtnCssClass to "WebButtonIcon WebIcon_Edit" // Icono de editar
             Set peAlign to alignRight
 
             WebRegisterPath ntNavigateForward oZoomJugador
@@ -115,66 +113,37 @@ Object oJugador is a cWebView
             Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
                 Move True to NavigateData.bReadOnly
             End_Procedure
-
         End_Object 
 
         // Se configura la navegación al hacer clic en la fila
         Procedure OnRowClick String sRowId
-            tWebNavigateData NavigateData
-            Get GetNavigateData to NavigateData
-
-            Case Begin
-                Case (NavigateData.eNavigateType = nfFromParent)
-                    // Se activa la navegación hacia la vista de detalle definida
-                    Send NavigateForward of oZoomJugador Self
-                    Case Break
-
-                Case (NavigateData.eNavigateType = nfFromChild)
-                    Send NavigateClose Self
-                    Case Break
-
-                Case (NavigateData.eNavigateType = nfFromMain)
-                    Send NavigateClose Self
-                    Case Break
-
-                Case Else // nfUndefined
-                    // Navegación por defecto a la vista Zoom
-                    Send NavigateForward of oZoomJugador Self
-            Case End
+            Send NavigateForward of oZoomJugador Self
         End_Procedure
 
         Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
             Move True to NavigateData.bReadOnly
         End_Procedure
-
     End_Object 
 
     Object oActionGroup is a cWebMenuGroup
-
         Object oSearch is a cWebMenuItem
             Set psCSSClass to "WebPromptMenuItem"
             Set psCaption to "Search"
-
             Procedure OnClick
                 Send Search of oList
             End_Procedure
-
         End_Object 
 
         Object oNewButton is a cWebMenuItem
             Set psCSSClass to "WebClearMenuItem"
             Set psCaption to "New"
-
             WebRegisterPath ntNavigateForward oZoomJugador
-
             Procedure OnClick
                 Send NavigatePath
             End_Procedure
-
             Procedure OnGetNavigateForwardData tWebNavigateData ByRef NavigateData Handle hoToView
                 Move True to NavigateData.bNewRecord
             End_Procedure
-
         End_Object 
     End_Object 
 
@@ -184,18 +153,14 @@ Object oJugador is a cWebView
 
         Case Begin
             Case (NavigateData.eNavigateType = nfFromParent)
-                Case Break
-
+            Case Break
             Case (NavigateData.eNavigateType = nfFromChild)
-                Case Break
-
+            Case Break
             Case (NavigateData.eNavigateType = nfFromMain)
                 WebSet pbRender of oDetailButton to False
-                Case Break
-
+            Case Break
             Case Else 
         Case End
-
     End_Procedure
 
 End_Object
